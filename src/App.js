@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import EventTable from './EventTable'
 
 const sampleInput = [
     {
@@ -38,7 +39,7 @@ function findOverlap(eventData, dates) {
     return overlap;
 }
 
-class SubmitButton extends Component {
+class SubmitButton extends Component<{name:string,eventId:number,},{}> {
     constructor(props) {
         super(props);
     
@@ -75,7 +76,7 @@ class SubmitButton extends Component {
 
 
 
-class ButtonGroup extends Component {
+class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):void,name:string},{newName:string,users:string[]}> {
     constructor(props) {
         super(props);
         this.state = {
@@ -130,7 +131,7 @@ class ButtonGroup extends Component {
 
 }
 
-class UsersDropdown extends Component {
+class UsersDropdown extends Component<{onDataSwitch(name:string):void,users:string[],name:string},{}> {
     constructor(props) {
         super(props);
         this.handleDataSwitch = this.handleDataSwitch.bind(this);
@@ -244,7 +245,7 @@ function Thead(props) {
     );
 }        
 
-class App extends Component {
+class App extends Component<{},{eventId:number,data:any[],dates:any[],name:string,path:string}> {
     constructor(props, context) {
         super(props, context);
         this.state = {
@@ -343,10 +344,11 @@ class App extends Component {
                 <div>
                     <p><a className="btn btn-primary" href = "/" onClick={this.handlePageSwitch}>&#x21d0; Home</a></p>
                     <ButtonGroup onDataSwitch={this.handleDataSwitch} eventId={this.state.eventId} name={this.state.name}/>
-                    <table className="table">
+                    <EventTable dates={this.state.dates} name={this.state.name} data={this.state.data}/>
+                    {/* <table className="table">
                         <Thead dates={this.state.dates} />
                         <Tbody name={this.state.name} data={this.state.data} onBoxClick={this.handleBoxClick} dates={this.state.dates} />
-                    </table>
+                    </table> */}
                     {this.state.name !== "Everyone" && <SubmitButton name={this.state.name} eventId={this.state.eventId}/>}
                     {this.state.name === "Everyone" && <span className="b-submit">(Editing is not allowed for this selection)</span>}
                 </div>
