@@ -1,0 +1,63 @@
+.box-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: rgb(150,150, 150);
+}
+
+.false:hover {
+    background-color: rgb(100,100, 100);
+}
+
+.true {
+    background-color: #2196F3;
+    display:inline-block;
+}
+
+.true:after {
+    position: relative;
+    content: '';
+    top: 3px;
+    left: 8px;
+    display: block;
+    width: 8px;
+    height: 16px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.b-submit {
+    float:right;
+}
+
+.dates-form input {
+    width: 10% !important;
+}
+
+.container {
+    max-width: 900px;
+}
+
+.hide {
+    display: none;
+}
+
+.error {
+    border: 1px solid #bd2130 !important; 
+}
