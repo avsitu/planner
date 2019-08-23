@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 const hours = ["9AM", "10AM", "11AM", "12PM","1PM","2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM"];
 
-class Checkbox extends Component<{name:string,id:string,data:any[]},{}> {
+class Checkbox extends Component<{name:string,id:string,data:string[]},{}> {
     constructor(props) {
         super(props);
         // this.selected = sampleInput.hasOwnProperty(props.id);
@@ -16,7 +16,7 @@ class Checkbox extends Component<{name:string,id:string,data:any[]},{}> {
     handleBoxClick(e) { //handles checkbox update
         // this.props.onBoxClick(e.target);
         var target = e.target;
-        if(e.target.classList.contains ("true")) {
+        if(target.classList.contains ("true")) {
             target.classList.remove("true");
             target.classList.add("false");
         }   
@@ -36,7 +36,7 @@ class Checkbox extends Component<{name:string,id:string,data:any[]},{}> {
         return (
             <div className="box-container">
                 <span className={selected ? "checkmark true" : "checkmark false"} 
-                id={this.props.id} onClick={this.props.name !== "Everyone" ? this.handleBoxClick : function(){return false;}} aria-hidden="true"></span>
+                id={this.props.id} onClick={this.props.name !== "Everyone" ? this.handleBoxClick : ()=>false} aria-hidden="true"></span>
             </div>                    
         );
     }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import EventTable from './EventTable'
+import SubmitButton from './UpdateEvent'
 
 const sampleInput = [
     {
@@ -39,40 +40,7 @@ function findOverlap(eventData, dates) {
     return overlap;
 }
 
-class SubmitButton extends Component<{name:string,eventId:number,},{}> {
-    constructor(props) {
-        super(props);
-    
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
 
-    currentSelection() {
-        var checkboxes = document.querySelectorAll(".checkmark");
-        var selected = [];
-        checkboxes.forEach(box => {
-            // console.log(box.id,box.dataset.checked);
-            if(box.classList.contains("true")) 
-                selected.push(box.id);
-        });
-        // console.log(selected);
-        return selected;
-    }
-
-    handleSubmit(e) {
-        var name = this.props.name;
-        sampleInput[this.props.eventId][name] = this.currentSelection();
-        console.log("submmited to sampleInput: ", name, sampleInput[this.props.eventId][name]);
-    }
-
-    render() {
-        return (
-            <div>
-                <button onClick={this.handleSubmit} className="b-submit btn btn-primary">Submit Changes for <strong>{this.props.name}</strong></button>
-            </div>
-        );
-    }
-
-}
 
 
 
@@ -106,22 +74,21 @@ class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):vo
         event.preventDefault();
         if(Object.keys(sampleInput[this.props.eventId]).includes(this.state.newName)) 
             alert('The name already exists: ' + this.state.newName);
-        else if(this.state.newName === "everyone") 
-            alert('The name \'everyone\' is reserved');
+        else if(this.state.newName === "everyone" || this.state.newName === "") 
+            alert('That name is invalid.');
         else {
             sampleInput[this.props.eventId][this.state.newName] = [];
             this.handleDataSwitch(this.state.newName);
             this.setState({newName: ""});
             this.setState({users: ["Everyone"].concat(Object.keys(sampleInput[this.props.eventId]))});
         } 
-
     }
 
     render() {
         return (
             <div>
                 <form className="form-inline" onSubmit={this.handleNewUser}>
-                    <input type="text" className="form-control mb-2 mr-sm-2" placeholder="Add me..."  onChange={this.handleKeyInput} value={this.state.newName}/>
+                    <input type="text" className="form-control mb-2 mr-sm-2" placeholder="Add me..." onChange={this.handleKeyInput} value={this.state.newName}/>
                     <button className="btn btn-primary  mb-2" type="submit">Add</button>
                 </form>
                 <UsersDropdown onDataSwitch={this.handleDataSwitch} users={this.state.users} name={this.props.name}/>
@@ -259,6 +226,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         this.handleBoxClick = this.handleBoxClick.bind(this);
         this.handlePageSwitch = this.handlePageSwitch.bind(this);
         this.handleNewEvent = this.handleNewEvent.bind(this);
+        this.handleEventUpdate = this.handleEventUpdate.bind(this);
     }
 
     handleDataSwitch(newName) {
@@ -299,12 +267,16 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
                 data: findOverlap(sampleInput[id], sampleDates[id]),
                 dates: sampleDates[id]
             });
-            // this.setState( { name: "Everyone" });
-            // this.setState( { data: findOverlap(sampleInput[id], sampleDates[id]) } );
-            // this.setState( { dates: sampleDates[id]} );
         }
         this.setState( {path: href} );
     }
+
+    handleEventUpdate(selections) {
+        sampleInput[this.state.eventId][this.state.name] = selections;
+        console.log("submmited to sampleInput: ", this.state.name, sampleInput[this.state.eventId][this.state.name]);
+    }
+
+    /*-----------------------------*/
 
     //validates date inputs from user
     validate(value) {
@@ -345,12 +317,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
                     <p><a className="btn btn-primary" href = "/" onClick={this.handlePageSwitch}>&#x21d0; Home</a></p>
                     <ButtonGroup onDataSwitch={this.handleDataSwitch} eventId={this.state.eventId} name={this.state.name}/>
                     <EventTable dates={this.state.dates} name={this.state.name} data={this.state.data}/>
-                    {/* <table className="table">
-                        <Thead dates={this.state.dates} />
-                        <Tbody name={this.state.name} data={this.state.data} onBoxClick={this.handleBoxClick} dates={this.state.dates} />
-                    </table> */}
-                    {this.state.name !== "Everyone" && <SubmitButton name={this.state.name} eventId={this.state.eventId}/>}
-                    {this.state.name === "Everyone" && <span className="b-submit">(Editing is not allowed for this selection)</span>}
+                    <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate}/>
                 </div>
             );
         else //home page events list
