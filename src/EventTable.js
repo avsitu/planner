@@ -46,7 +46,7 @@ class Checkbox extends Component<{name:string,id:string,data:string[]},{}> {
 function Tdata(props) { //KEY IS THE KeY!!!!!
     return (
         <td id={"box-"+props.id}> 
-            <Checkbox key={props.name+"-"+props.id} id={props.id} data={props.data} name={props.name}/>
+            <Checkbox id={props.id} data={props.data} name={props.name}/>
         </td>
     );            
 }
@@ -54,7 +54,7 @@ function Tdata(props) { //KEY IS THE KeY!!!!!
 function Trow(props) {
     var h = props.hour;
     // var days = ["mon"];
-    var checkboxes = props.dates.map((date) => <Tdata key={date+"-"+h} id={date+"-"+h} data={props.data} name={props.name} onBoxClick={props.onBoxClick}/>); 
+    var checkboxes = props.dates.map((date) => <Tdata key={props.name+"-"+date+"-"+h} id={date+"-"+h} data={props.data} name={props.name}/>); 
     return (
         <tr>
             <th scope="row">{h}</th>
@@ -66,7 +66,7 @@ function Trow(props) {
 function Tbody(props) {
     var body = [];
     for(var i = 0; i < hours.length; i++) { //each row is hour
-        body.push(<Trow key={"hour-"+hours[i]} hour={hours[i]} data={props.data} name={props.name} onBoxClick={props.onBoxClick} dates={props.dates} />);
+        body.push(<Trow key={"hour-"+hours[i]} hour={hours[i]} data={props.data} name={props.name} dates={props.dates} />);
     }
     return <tbody>{body}</tbody>;
 }
@@ -83,10 +83,6 @@ function Thead(props) {
 }
 
 class EventTable extends Component<{name:string,dates:any[],data:any[]}> {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return(
             <table className="table">

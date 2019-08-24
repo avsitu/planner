@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import EventTable from './EventTable'
 import SubmitButton from './UpdateEvent'
 import NewEvent from './AddEvent'
+import Controls from './TableControls'
 
 const sampleInput = [
     {
@@ -39,189 +40,17 @@ function findOverlap(eventData, dates) {
     }
     console.log(overlap);
     return overlap;
-}
+}       
 
-class ButtonGroup extends Component<{eventId:number,onNameSwitch(name:string):void,name:string,onPageSwitch(e):void},{newName:string,users:string[]}> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            newName: "",
-            users: ["Everyone"].concat(Object.keys(sampleInput[this.props.eventId]))
-        }
-    
-        this.handleNameSwitch = this.handleNameSwitch.bind(this);
-        this.handleKeyInput = this.handleKeyInput.bind(this);
-        this.handleNewUser = this.handleNewUser.bind(this);
-        this.handlePageSwitch = this.handlePageSwitch.bind(this);
-    }
-
-    handleNameSwitch(name) {
-        this.props.onNameSwitch(name);
-        // document.querySelector("#user-toggle").innerHTML = name;
-    }
-
-    handlePageSwitch(e) {
-        this.props.onPageSwitch(e);
-    }
-
-    handleKeyInput(event) {
-        if(event.target.value.includes(" ")) //no spaces for input
-            event.target.value = this.state.newName;
-        else    
-            this.setState({newName: event.target.value.toLowerCase()});
-    }
-
-    handleNewUser(event) {
-        event.preventDefault();
-        if(Object.keys(sampleInput[this.props.eventId]).includes(this.state.newName)) 
-            alert('The name already exists: ' + this.state.newName);
-        else if(this.state.newName === "everyone" || this.state.newName === "") 
-            alert('That name is invalid.');
-        else {
-            sampleInput[this.props.eventId][this.state.newName] = [];
-            this.handleNameSwitch(this.state.newName);
-            this.setState({newName: ""});
-            this.setState({users: ["Everyone"].concat(Object.keys(sampleInput[this.props.eventId]))});
-        } 
-    }
-
-    render() {
-        return (
-            <div>
-                <p><a className="btn btn-primary" href = "/" onClick={this.handlePageSwitch}>&#x21d0; Home</a></p>
-                <form className="form-inline" onSubmit={this.handleNewUser}>
-                    <input type="text" className="form-control mb-2 mr-sm-2" placeholder="Add me..." onChange={this.handleKeyInput} value={this.state.newName}/>
-                    <button className="btn btn-primary  mb-2" type="submit">Add</button>
-                </form>
-                <UsersDropdown onNameSwitch={this.handleNameSwitch} users={this.state.users} name={this.props.name}/>
-            </div>
-        );
-    }
-
-}
-
-class UsersDropdown extends Component<{onNameSwitch(name:string):void,users:string[],name:string},{}> {
-    constructor(props) {
-        super(props);
-        this.handleNameSwitch = this.handleNameSwitch.bind(this);
-    }  
-    
-    handleNameSwitch(e) {
-        // e.preventDefault();
-        // var name = e.target.dataset.name;
-        e.preventDefault();
-        var name = e.target.dataset.name;
-        this.props.onNameSwitch(name);
-    }            
-
-    render() {
-        var buttons = this.props.users.map((user) => 
-            <button className="dropdown-item" data-name={user} onClick={this.handleNameSwitch} key={"user-"+user}>{user}</button>
-        );
-        buttons.splice(1,0,(<div key="divider" className="dropdown-divider"></div>));
-        return (
-            <div className="dropdown">
-                <span>Show Availability for: </span>
-                <button id="user-toggle" className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {this.props.name}
-                </button>
-                <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {buttons}
-                </div>
-            </div>
-        );
-    }
-    
-}
-    
-class Checkbox extends Component {
-    constructor(props) {
-        super(props);
-        // this.selected = sampleInput.hasOwnProperty(props.id);
-        this.handleBoxClick = this.handleBoxClick.bind(this);
-        // this.handleDataSwitch = this.handleDataSwitch.bind(this);
-        // this.state = {
-        //     selected: this.props.data.includes(this.props.id)
-        // }
-    }
-
-    handleBoxClick(e) { //handles checkbox update
-        // this.props.onBoxClick(e.target);
-        var target = e.target;
-        if(e.target.classList.contains ("true")) {
-            target.classList.remove("true");
-            target.classList.add("false");
-        }   
-        else {
-            target.classList.remove("false");
-            target.classList.add("true");
-        } 
-    } 
-
-    // componentWillReceiveProps(nextProps) {
-    //     console.log('new props ', nextProps.id, nextProps.data.includes(nextProps.id));
-    //     this.setState({selected: nextProps.data.includes(nextProps.id)});
-    // }            
-    render() {
-        const selected = this.props.data.includes(this.props.id);
-        // console.log("rendered: ", this.props.id, this.state.selected);
-        return (
-            <div className="box-container">
-                <span className={selected ? "checkmark true" : "checkmark false"} 
-                id={this.props.id} onClick={this.props.name !== "Everyone" ? this.handleBoxClick : function(){return false;}} aria-hidden="true"></span>
-            </div>                    
-        );
-    }
-
-}
-
-function Tdata(props) { //KEY IS THE KeY!!!!!
-    return (
-        <td id={"box-"+props.id}> 
-            <Checkbox key={props.name+"-"+props.id} id={props.id} data={props.data} name={props.name} onBoxClick={props.onBoxClick}/>
-        </td>
-    );            
-}
-
-function Trow(props) {
-    var h = props.hour;
-    // var days = ["mon"];
-    var checkboxes = props.dates.map((date) => <Tdata key={date+"-"+h} id={date+"-"+h} data={props.data} name={props.name} onBoxClick={props.onBoxClick}/>); 
-    return (
-        <tr>
-            <th scope="row">{h}</th>
-            {checkboxes}
-        </tr>
-    );
-}
-
-function Tbody(props) {
-    var body = [];
-    for(var i = 0; i < hours.length; i++) { //each row is hour
-        body.push(<Trow key={"hour-"+hours[i]} hour={hours[i]} data={props.data} name={props.name} onBoxClick={props.onBoxClick} dates={props.dates} />);
-    }
-    return <tbody>{body}</tbody>;
-}
-
-function Thead(props) {
-    var header = ["Hour"].concat(props.dates).map((date) => <th scope="col" key={date}>{date}</th>);
-    return (
-        <thead>
-            <tr>
-                {header}
-            </tr>
-        </thead>
-    );
-}        
-
-class App extends Component<{},{eventId:number,data:any[],dates:any[],name:string,path:string}> {
+class App extends Component<{},{eventId:number,data:string[],dates:string[],users:string[],name:string,path:string}> {
     constructor(props, context) {
         super(props, context);
         this.state = {
             eventId: 0,
-            data: null,
-            dates: sampleDates[0],
-            name: "Everyone",
+            data: [],
+            dates: [],
+            users: [],
+            name: "",
             path: "/"
         };
         this.handleNameSwitch = this.handleNameSwitch.bind(this);
@@ -229,14 +58,18 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         this.handlePageSwitch = this.handlePageSwitch.bind(this);
         this.handleNewEvent = this.handleNewEvent.bind(this);
         this.handleEventUpdate = this.handleEventUpdate.bind(this);
+        this.handleNewUser = this.handleNewUser.bind(this);
     }
 
     handleNameSwitch(newName) {
         // console.log(sampleInput);
         // sampleInput[this.state.name] = this.state.data;
         // console.log(sampleInput);
-        this.setState( { name: newName }, () => { } );
-        this.setState( { data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] }, () => { } );
+        this.setState({ 
+            name: newName,
+            data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] 
+        });
+        // this.setState( { }, () => { } );
     }
 
     handleBoxClick(target) {
@@ -267,7 +100,8 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
                 eventId: id,
                 name: "Everyone",
                 data: findOverlap(sampleInput[id], sampleDates[id]),
-                dates: sampleDates[id]
+                dates: sampleDates[id],
+                users: ["Everyone"].concat(Object.keys(sampleInput[id]))
             });
         }
         this.setState( {path: href} );
@@ -276,6 +110,12 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
     handleEventUpdate(selections) {
         sampleInput[this.state.eventId][this.state.name] = selections;
         console.log("submmited to sampleInput: ", this.state.name, sampleInput[this.state.eventId][this.state.name]);
+    }
+
+    handleNewUser(newName) {
+        sampleInput[this.state.eventId][newName] = [];
+        this.setState((state)=> ({users: state.users.concat([newName])}));
+        this.handleNameSwitch(newName);
     }
 
     /*-----------------------------*/
@@ -311,13 +151,15 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         });
         if(newDates.length === 0) document.querySelector("#empty-err").classList.remove("hide");
         else alert("Good job (some of) your inputs are valid. Event add coming soon...");
+        // ---------- make sure to validate for dup dates 
     }
 
     render() {
         if(this.state.path.includes("?event=")) //event page
             return(
                 <div>
-                    <ButtonGroup onNameSwitch={this.handleNameSwitch} eventId={this.state.eventId} name={this.state.name} onPageSwitch={this.handlePageSwitch}/>
+                    <Controls eventId={this.state.eventId} name={this.state.name} users={this.state.users}
+                        onNameSwitch={this.handleNameSwitch} onPageSwitch={this.handlePageSwitch} onNewUser={this.handleNewUser}/>
                     <EventTable dates={this.state.dates} name={this.state.name} data={this.state.data}/>
                     <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate}/>
                 </div>
