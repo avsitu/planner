@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import EventTable from './EventTable'
 import SubmitButton from './UpdateEvent'
+import NewEvent from './AddEvent'
 
 const sampleInput = [
     {
@@ -40,11 +41,7 @@ function findOverlap(eventData, dates) {
     return overlap;
 }
 
-
-
-
-
-class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):void,name:string},{newName:string,users:string[]}> {
+class ButtonGroup extends Component<{eventId:number,onNameSwitch(name:string):void,name:string,onPageSwitch(e):void},{newName:string,users:string[]}> {
     constructor(props) {
         super(props);
         this.state = {
@@ -52,15 +49,19 @@ class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):vo
             users: ["Everyone"].concat(Object.keys(sampleInput[this.props.eventId]))
         }
     
-        this.handleDataSwitch = this.handleDataSwitch.bind(this);
+        this.handleNameSwitch = this.handleNameSwitch.bind(this);
         this.handleKeyInput = this.handleKeyInput.bind(this);
         this.handleNewUser = this.handleNewUser.bind(this);
+        this.handlePageSwitch = this.handlePageSwitch.bind(this);
     }
 
-    handleDataSwitch(name) {
-        this.props.onDataSwitch(name);
+    handleNameSwitch(name) {
+        this.props.onNameSwitch(name);
         // document.querySelector("#user-toggle").innerHTML = name;
+    }
 
+    handlePageSwitch(e) {
+        this.props.onPageSwitch(e);
     }
 
     handleKeyInput(event) {
@@ -78,7 +79,7 @@ class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):vo
             alert('That name is invalid.');
         else {
             sampleInput[this.props.eventId][this.state.newName] = [];
-            this.handleDataSwitch(this.state.newName);
+            this.handleNameSwitch(this.state.newName);
             this.setState({newName: ""});
             this.setState({users: ["Everyone"].concat(Object.keys(sampleInput[this.props.eventId]))});
         } 
@@ -87,34 +88,35 @@ class ButtonGroup extends Component<{eventId:number,onDataSwitch(name:string):vo
     render() {
         return (
             <div>
+                <p><a className="btn btn-primary" href = "/" onClick={this.handlePageSwitch}>&#x21d0; Home</a></p>
                 <form className="form-inline" onSubmit={this.handleNewUser}>
                     <input type="text" className="form-control mb-2 mr-sm-2" placeholder="Add me..." onChange={this.handleKeyInput} value={this.state.newName}/>
                     <button className="btn btn-primary  mb-2" type="submit">Add</button>
                 </form>
-                <UsersDropdown onDataSwitch={this.handleDataSwitch} users={this.state.users} name={this.props.name}/>
+                <UsersDropdown onNameSwitch={this.handleNameSwitch} users={this.state.users} name={this.props.name}/>
             </div>
         );
     }
 
 }
 
-class UsersDropdown extends Component<{onDataSwitch(name:string):void,users:string[],name:string},{}> {
+class UsersDropdown extends Component<{onNameSwitch(name:string):void,users:string[],name:string},{}> {
     constructor(props) {
         super(props);
-        this.handleDataSwitch = this.handleDataSwitch.bind(this);
+        this.handleNameSwitch = this.handleNameSwitch.bind(this);
     }  
     
-    handleDataSwitch(e) {
+    handleNameSwitch(e) {
         // e.preventDefault();
         // var name = e.target.dataset.name;
         e.preventDefault();
         var name = e.target.dataset.name;
-        this.props.onDataSwitch(name);
+        this.props.onNameSwitch(name);
     }            
 
     render() {
         var buttons = this.props.users.map((user) => 
-            <button className="dropdown-item" data-name={user} onClick={this.handleDataSwitch} key={"user-"+user}>{user}</button>
+            <button className="dropdown-item" data-name={user} onClick={this.handleNameSwitch} key={"user-"+user}>{user}</button>
         );
         buttons.splice(1,0,(<div key="divider" className="dropdown-divider"></div>));
         return (
@@ -222,14 +224,14 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
             name: "Everyone",
             path: "/"
         };
-        this.handleDataSwitch = this.handleDataSwitch.bind(this);
+        this.handleNameSwitch = this.handleNameSwitch.bind(this);
         this.handleBoxClick = this.handleBoxClick.bind(this);
         this.handlePageSwitch = this.handlePageSwitch.bind(this);
         this.handleNewEvent = this.handleNewEvent.bind(this);
         this.handleEventUpdate = this.handleEventUpdate.bind(this);
     }
 
-    handleDataSwitch(newName) {
+    handleNameSwitch(newName) {
         // console.log(sampleInput);
         // sampleInput[this.state.name] = this.state.data;
         // console.log(sampleInput);
@@ -280,6 +282,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
 
     //validates date inputs from user
     validate(value) {
+        return true;
         var arr = value.split('/');
         if(arr.length !== 2) return null;
         var formatted = arr.map((v)=> parseInt(v)).join('-');
@@ -295,7 +298,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         var inputs = e.target.querySelectorAll("input");
         var newDates = [];
         inputs.forEach((input)=> {
-            // console.log(input.value);
+            console.log(input.value);
             input.classList.remove("error");
             if(input.value !== "") {
                 var d = this.validate(input.value);
@@ -314,8 +317,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         if(this.state.path.includes("?event=")) //event page
             return(
                 <div>
-                    <p><a className="btn btn-primary" href = "/" onClick={this.handlePageSwitch}>&#x21d0; Home</a></p>
-                    <ButtonGroup onDataSwitch={this.handleDataSwitch} eventId={this.state.eventId} name={this.state.name}/>
+                    <ButtonGroup onNameSwitch={this.handleNameSwitch} eventId={this.state.eventId} name={this.state.name} onPageSwitch={this.handlePageSwitch}/>
                     <EventTable dates={this.state.dates} name={this.state.name} data={this.state.data}/>
                     <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate}/>
                 </div>
@@ -323,27 +325,7 @@ class App extends Component<{},{eventId:number,data:any[],dates:any[],name:strin
         else //home page events list
             return(
                 <div>
-                    <p>
-                        <button className="btn btn-primary" type="button" data-toggle="collapse" data-target="#fcollapse" aria-expanded="false" aria-controls="collapseExample">
-                            Add New Event
-                        </button>
-                    </p>
-                    <div className="collapse" id="fcollapse">
-                        <div className="card card-body">
-                            <p>Add up to 5 dates that are within 1 month from now(?)</p> 
-                            <form className="form-inline dates-form" onSubmit={this.handleNewEvent} id="newForm">
-                                <label htmlFor="date1" hidden/>                                                                  
-                                <input type="text" id="date1" className="form-control mb-2 mr-sm-2" placeholder="mm/dd"/>
-                                <input type="text" className="form-control mb-2 mr-sm-2" placeholder="mm/dd"/>
-                                <input type="text" className="form-control mb-2 mr-sm-2" placeholder="mm/dd"/>
-                                <input type="text" className="form-control mb-2 mr-sm-2" placeholder="mm/dd"/>
-                                <input type="text" className="form-control mb-2 mr-sm-2" placeholder="mm/dd"/>
-                                <button className="btn btn-primary mb-2" type="submit">Add</button>
-                            </form>
-                            <p id="invalid-err" className="hide">Please enter dates in valid format.</p>
-                            <p id="empty-err" className="hide">Please enter at least 1 valid date.</p>
-                        </div>
-                    </div>
+                    <NewEvent onFormSubmit={this.handleNewEvent}/>
 
                     <ul>
                         <li><a href = "?event=0" onClick={this.handlePageSwitch}>Sample event 1</a></li>
