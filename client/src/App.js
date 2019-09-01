@@ -61,6 +61,22 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
         this.handleNewUser = this.handleNewUser.bind(this);
     }
 
+    componentDidMount() {
+        fetch("/api/food?q=hash+browns")
+        .then(res => res.json())
+        .then(
+          (result) => {
+            console.log(result);
+          },
+          // Note: it's important to handle errors here
+          // instead of a catch() block so that we don't swallow
+          // exceptions from actual bugs in components.
+          (error) => {
+            console.log(error);
+          }
+        )        
+    }
+
     handleNameSwitch(newName) {
         // console.log(sampleInput);
         // sampleInput[this.state.name] = this.state.data;
