@@ -62,11 +62,12 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
     }
 
     componentDidMount() {
-        fetch("/api/food?q=hash+browns")
+        fetch("/get/users")
         .then(res => res.json())
         .then(
           (result) => {
             console.log(result);
+            sampleInput[0] = result;
           },
           // Note: it's important to handle errors here
           // instead of a catch() block so that we don't swallow

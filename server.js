@@ -66,6 +66,51 @@ app.get("/api/food", (req, res) => {
   }
 });
 
+const sqlite3 = require('sqlite3').verbose();
+const db3 = new sqlite3.Database('db/event.sqlite3');
+app.get("/users/get", (req, res) => {
+  db3.all(`select * from user where eventID=1`, [], (err, rows) => {
+    if (err) {
+      throw err;
+    }
+    const result = {};
+    rows.forEach((row) => {
+      result[row.name] = row.dates.split(',');
+    });
+    console.log(result);
+    res.json(result);
+  });
+});
+
+app.get("/events/get", (req, res) => {
+  db3.all(`select rowid,* from event`, [], (err, rows) => {
+    if (err) {
+      throw err;
+    }
+    const result = rows.map((row) => {
+      return {name:row.name, id:row.rowid, dates: row.dates};
+    });
+    // console.log(result);
+    res.json(result);
+  });
+});
+
+app.get("/events/add", (req, res) => {
+  db3.run(`INSERT into event (name, dates) VALUES('event3', '1-1,1-2')`, [], function(err) {
+    if (err) {
+      throw err;
+    }
+    // console.log(this.lastID, this.changes);
+    db3.get(`select * from event where rowid=?`,[this.lastID],(err, row) => {
+      if (err) {
+        throw err;
+      }
+      console.log(row);
+      res.json(row);
+    })  
+  });
+});
+
 app.listen(app.get("port"), () => {
   console.log(`Find the server at: http://localhost:${app.get("port")}/`); // eslint-disable-line no-console
 });
