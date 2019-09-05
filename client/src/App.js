@@ -7,7 +7,7 @@ import Controls from './TableControls'
 const sampleInput = [
     {
         "alice": ["5-2-1PM"],
-        "bob" : ["5-4-2PM", "5-4-3PM", "5-4-4PM", "5-10-2PM", "5-11-2PM"]
+        "bob": ["5-4-2PM", "5-4-3PM", "5-4-4PM", "5-10-2PM", "5-11-2PM"]
     },
     {
         "eve": ["5-3-1PM"],
@@ -24,32 +24,33 @@ const sampleDates = [
     ]
 ]
 
-const hours = ["9AM", "10AM", "11AM", "12PM","1PM","2PM","3PM","4PM","5PM","6PM","7PM","8PM","9PM"];
+const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM"];
 
 function findOverlap(eventData, dates) {
     var overlap = [];
     //populates list with all possible time slots
     dates.forEach(day => {
         hours.forEach(hour => {
-            overlap.push(day+"-"+hour);
+            overlap.push(day + "-" + hour);
         });
     });
     //filters for time slots that exist for all persons
-    for(let person in eventData) {
+    for (let person in eventData) {
         overlap = overlap.filter((time) => eventData[person].includes(time));
     }
     console.log(overlap);
     return overlap;
-}       
+}
 
-class App extends Component<{},{eventId:number,data:string[],dates:string[],users:string[],name:string,path:string}> {
+class App extends Component<{}, { eventId: number, data: {}, dates: string[], users: string[], name: string, path: string, eventsList: any[] }> {
     constructor(props, context) {
         super(props, context);
         this.state = {
             eventId: 0,
-            data: [],
+            data: {},
             dates: [],
             users: [],
+            eventsList: [],
             name: "",
             path: "/"
         };
@@ -62,35 +63,36 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
     }
 
     componentDidMount() {
-        fetch("/get/users")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            console.log(result);
-            sampleInput[0] = result;
-          },
-          // Note: it's important to handle errors here
-          // instead of a catch() block so that we don't swallow
-          // exceptions from actual bugs in components.
-          (error) => {
-            console.log(error);
-          }
-        )        
+        fetch("/events/get")
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result);
+                    this.setState({ eventsList: result });
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    console.log(error);
+                }
+            )
+
     }
 
     handleNameSwitch(newName) {
         // console.log(sampleInput);
         // sampleInput[this.state.name] = this.state.data;
         // console.log(sampleInput);
-        this.setState({ 
+        this.setState({
             name: newName,
-            data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] 
+            // data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] 
         });
         // this.setState( { }, () => { } );
     }
 
     handleBoxClick(target) {
-        if(target.classList.contains ("true")) {
+        if (target.classList.contains("true")) {
             // delete sampleInput[e.target.id];
             target.classList.remove("true");
             target.classList.add("false");
@@ -98,40 +100,59 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
             // var i = this.state.data.indexOf(target.id);
             // this.setState((pstate) => { (this.state.data = pstate.data.splice(i, 1)) }, 
             //     () => { console.log(this.state.data);});
-        }   
+        }
         else {
             // sampleInput[e.target.id] = 1;
             target.classList.remove("false");
             target.classList.add("true");
             target.innerHTML = "true";
             // this.setState((pstate) => { (this.state.data = pstate.data.push(target.id)) }, () => { console.log(this.state.data);});
-        }       
+        }
     }
 
     handlePageSwitch(e) {
         e.preventDefault();
         var href = e.target.getAttribute('href');
-        if(href.includes("?event=")) {
+        if (href.includes("?event=")) {
             var id = parseInt(href.substr(7));
-            this.setState({
-                eventId: id,
-                name: "Everyone",
-                data: findOverlap(sampleInput[id], sampleDates[id]),
-                dates: sampleDates[id],
-                users: ["Everyone"].concat(Object.keys(sampleInput[id]))
-            });
+            fetch("/users/get")
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        sampleInput[0] = result;
+                        console.log(result);
+                        this.setState({
+                            eventId: id,
+                            name: "Everyone",
+                            data: result,
+                            // data: findOverlap(sampleInput[id], sampleDates[id]),
+                            // dates: sampleDates[id],
+                            users: ["Everyone"].concat(Object.keys(result)),
+                            path: href
+                        });
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                )
         }
-        this.setState( {path: href} );
+        else
+            this.setState({ path: href });
     }
 
     handleEventUpdate(selections) {
-        sampleInput[this.state.eventId][this.state.name] = selections;
-        console.log("submmited to sampleInput: ", this.state.name, sampleInput[this.state.eventId][this.state.name]);
+        // sampleInput[this.state.eventId][this.state.name] = selections;
+        // console.log("submmited to sampleInput: ", this.state.name, sampleInput[this.state.eventId][this.state.name]);
+        this.setState(state => {
+            let data = { ...state.data };
+            data[state.name] = selections;
+            return { data };
+        });
     }
 
     handleNewUser(newName) {
         sampleInput[this.state.eventId][newName] = [];
-        this.setState((state)=> ({users: state.users.concat([newName])}));
+        this.setState((state) => ({ users: state.users.concat([newName]) }));
         this.handleNameSwitch(newName);
     }
 
@@ -141,9 +162,9 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
     validate(value) {
         return true;
         var arr = value.split('/');
-        if(arr.length !== 2) return null;
-        var formatted = arr.map((v)=> parseInt(v)).join('-');
-        if(formatted.includes("NaN")) return null;
+        if (arr.length !== 2) return null;
+        var formatted = arr.map((v) => parseInt(v)).join('-');
+        if (formatted.includes("NaN")) return null;
         else return formatted;
     }
 
@@ -154,44 +175,51 @@ class App extends Component<{},{eventId:number,data:string[],dates:string[],user
         // console.log(e.target.querySelectorAll("input"));
         var inputs = e.target.querySelectorAll("input");
         var newDates = [];
-        inputs.forEach((input)=> {
+        inputs.forEach((input) => {
             console.log(input.value);
             input.classList.remove("error");
-            if(input.value !== "") {
+            if (input.value !== "") {
                 var d = this.validate(input.value);
-                if(!d) {
+                if (!d) {
                     input.classList.add("error");
                     document.querySelector("#invalid-err").classList.remove("hide");
                 }
                 else newDates.push(d);
             }
         });
-        if(newDates.length === 0) document.querySelector("#empty-err").classList.remove("hide");
+        if (newDates.length === 0) document.querySelector("#empty-err").classList.remove("hide");
         else alert("Good job (some of) your inputs are valid. Event add coming soon...");
         // ---------- make sure to validate for dup dates 
     }
 
     render() {
-        if(this.state.path.includes("?event=")) //event page
-            return(
+        if (this.state.path.includes("?event=")) {
+            const dates = this.state.eventsList[this.state.eventId].dates;
+            return (
                 <div>
                     <Controls eventId={this.state.eventId} name={this.state.name} users={this.state.users}
-                        onNameSwitch={this.handleNameSwitch} onPageSwitch={this.handlePageSwitch} onNewUser={this.handleNewUser}/>
-                    <EventTable dates={this.state.dates} name={this.state.name} data={this.state.data}/>
-                    <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate}/>
+                        onNameSwitch={this.handleNameSwitch} onPageSwitch={this.handlePageSwitch} onNewUser={this.handleNewUser} />
+                    <EventTable dates={dates} name={this.state.name}
+                        data={this.state.name !== "Everyone" ? this.state.data[this.state.name] : findOverlap(this.state.data, dates)} />
+                    <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate} />
                 </div>
             );
-        else //home page events list
-            return(
-                <div>
-                    <NewEvent onFormSubmit={this.handleNewEvent}/>
+        } //event page
 
+        else {
+            const events = this.state.eventsList.map((e, index) =>
+                <li key={e.id}><a href={"?event=" + index} onClick={this.handlePageSwitch}>{e.name}</a></li>);
+            return (
+                <div>
+                    <NewEvent onFormSubmit={this.handleNewEvent} />
                     <ul>
-                        <li><a href = "?event=0" onClick={this.handlePageSwitch}>Sample event 1</a></li>
-                        <li><a href = "?event=1" onClick={this.handlePageSwitch}>Sample event 2</a></li>
+                        {events}
+                        {/* <li><a href = "?event=0" onClick={this.handlePageSwitch}>Sample event 1</a></li>
+                        <li><a href = "?event=1" onClick={this.handlePageSwitch}>Sample event 2</a></li> */}
                     </ul>
                 </div>
             )
+        } //home page events list
     }
 }
 

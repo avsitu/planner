@@ -88,7 +88,7 @@ app.get("/events/get", (req, res) => {
       throw err;
     }
     const result = rows.map((row) => {
-      return {name:row.name, id:row.rowid, dates: row.dates};
+      return {name:row.name, id:row.rowid, dates: row.dates.split(',')};
     });
     // console.log(result);
     res.json(result);
