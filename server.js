@@ -69,17 +69,59 @@ app.get("/api/food", (req, res) => {
 const sqlite3 = require('sqlite3').verbose();
 const db3 = new sqlite3.Database('db/event.sqlite3');
 app.get("/users/get", (req, res) => {
-  db3.all(`select * from user where eventID=1`, [], (err, rows) => {
+  const param = req.query.id;
+  db3.all(`select * from user where eventID=?`, [param], (err, rows) => {
     if (err) {
       throw err;
     }
     const result = {};
     rows.forEach((row) => {
-      result[row.name] = row.dates.split(',');
+      result[row.name] = row.dates==='' ? [] : row.dates.split(',');
     });
     console.log(result);
     res.json(result);
   });
+});
+
+app.get("/users/update", (req, res) => {
+  const id = req.query.id, name = req.query.name, dates = req.query.dates;
+  db3.run(`update user set dates=? where eventID=? and name=?`, [dates,id,name], function(err) {
+    if (err) {
+      throw err;
+    }
+    // console.log(this.lastID);
+    // db3.get(`select * from user where rowid=?`,[this.lastID],(err, row) => {
+    //   if (err) {
+    //     throw err;
+    //   }
+    //   console.log(row);
+    //   res.json(row);
+    // })
+  });
+});
+
+app.get("/users/add", (req, res) => {
+  const id = req.query.id, name = req.query.name;
+  db3.get(`select * from user where name=? and eventID=?`, [name,id], (err, row) => {
+    if(row)
+      res.json("user already exists");
+    else {
+      db3.run(`INSERT into user (name, dates, eventID) VALUES(?,'',?)`, [name,id], function(err) {
+        if (err) {
+          throw err;
+        }
+        // console.log(this.lastID, this.changes);
+        // db3.get(`select * from user where rowid=?`,[this.lastID],(err, row) => {
+        //   if (err) {
+        //     throw err;
+        //   }
+        //   console.log(row);
+        //   res.json(row);
+        // })  
+      });      
+    }
+  });
+
 });
 
 app.get("/events/get", (req, res) => {
