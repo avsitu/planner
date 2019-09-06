@@ -38,7 +38,7 @@ function findOverlap(eventData, dates) {
     for (let person in eventData) {
         overlap = overlap.filter((time) => eventData[person].includes(time));
     }
-    console.log(overlap);
+    // console.log(overlap);
     return overlap;
 }
 
@@ -47,8 +47,8 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
         super(props, context);
         this.state = {
             eventId: 0,
-            data: {},
-            dates: [],
+            data: {}, 
+            // dates: [],
             users: [],
             eventsList: [],
             name: "",
@@ -88,7 +88,6 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
             name: newName,
             // data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] 
         });
-        // this.setState( { }, () => { } );
     }
 
     handleBoxClick(target) {
@@ -114,27 +113,29 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
         e.preventDefault();
         var href = e.target.getAttribute('href');
         if (href.includes("?event=")) {
-            var id = parseInt(href.substr(7));
-            fetch("/users/get")
+            var index = parseInt(href.substr(7));
+            const url = "/users/get?id="+this.state.eventsList[index].id;
+            console.log(url);
+            fetch(url)
                 .then(res => res.json())
                 .then(
                     (result) => {
                         sampleInput[0] = result;
                         console.log(result);
                         this.setState({
-                            eventId: id,
+                            eventId: index,
                             name: "Everyone",
                             data: result,
                             // data: findOverlap(sampleInput[id], sampleDates[id]),
                             // dates: sampleDates[id],
                             users: ["Everyone"].concat(Object.keys(result)),
-                            path: href
+                            path: href //issue:path may be changing before other states are updated
                         });
                     },
                     (error) => {
                         console.log(error);
                     }
-                )
+                );
         }
         else
             this.setState({ path: href });
@@ -148,12 +149,20 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
             data[state.name] = selections;
             return { data };
         });
+        const url = `/users/update?name=${this.state.name}&id=${this.state.eventsList[this.state.eventId].id}&dates=${selections.toString()}`;
+        // console.log(url);
+        fetch(url);
     }
 
     handleNewUser(newName) {
-        sampleInput[this.state.eventId][newName] = [];
-        this.setState((state) => ({ users: state.users.concat([newName]) }));
-        this.handleNameSwitch(newName);
+        // sampleInput[this.state.eventId][newName] = [];
+        this.setState((state) => ({ 
+            users: state.users.concat([newName]),
+            name: newName      
+        }));
+        // this.handleNameSwitch(newName);
+        // const url = `/users/add?name=${newName}&id=${this.state.eventsList[this.state.eventId].id}`;
+        // fetch(url);
     }
 
     /*-----------------------------*/
