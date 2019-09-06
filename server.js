@@ -78,7 +78,7 @@ app.get("/users/get", (req, res) => {
     rows.forEach((row) => {
       result[row.name] = row.dates==='' ? [] : row.dates.split(',');
     });
-    console.log(result);
+    // console.log(result);
     res.json(result);
   });
 });

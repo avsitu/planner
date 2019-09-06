@@ -42,7 +42,7 @@ function findOverlap(eventData, dates) {
     return overlap;
 }
 
-class App extends Component<{}, { eventId: number, data: {}, dates: string[], users: string[], name: string, path: string, eventsList: any[] }> {
+class App extends Component<{}, { eventId: number, data: {}, users: string[], name: string, path: string, eventsList: any[] }> {
     constructor(props, context) {
         super(props, context);
         this.state = {
@@ -161,8 +161,8 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
             name: newName      
         }));
         // this.handleNameSwitch(newName);
-        // const url = `/users/add?name=${newName}&id=${this.state.eventsList[this.state.eventId].id}`;
-        // fetch(url);
+        const url = `/users/add?name=${newName}&id=${this.state.eventsList[this.state.eventId].id}`;
+        fetch(url);
     }
 
     /*-----------------------------*/
@@ -209,7 +209,7 @@ class App extends Component<{}, { eventId: number, data: {}, dates: string[], us
                     <Controls eventId={this.state.eventId} name={this.state.name} users={this.state.users}
                         onNameSwitch={this.handleNameSwitch} onPageSwitch={this.handlePageSwitch} onNewUser={this.handleNewUser} />
                     <EventTable dates={dates} name={this.state.name}
-                        data={this.state.name !== "Everyone" ? this.state.data[this.state.name] : findOverlap(this.state.data, dates)} />
+                        data={this.state.name !== "Everyone" ? (this.state.data[this.state.name] || []) : findOverlap(this.state.data, dates)} />
                     <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate} />
                 </div>
             );
