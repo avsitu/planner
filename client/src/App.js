@@ -115,7 +115,7 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
         if (href.includes("?event=")) {
             var index = parseInt(href.substr(7));
             const url = "/users/get?id="+this.state.eventsList[index].id;
-            console.log(url);
+            // console.log(url);
             fetch(url)
                 .then(res => res.json())
                 .then(
@@ -182,22 +182,29 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
         document.querySelector("#invalid-err").classList.add("hide");
         document.querySelector("#empty-err").classList.add("hide");
         // console.log(e.target.querySelectorAll("input"));
-        var inputs = e.target.querySelectorAll("input");
-        var newDates = [];
+        const name = e.target.querySelector("input[type='text']").value;
+        var inputs = e.target.querySelectorAll("input[type='date']");
+        var newDates = new Set();
         inputs.forEach((input) => {
-            console.log(input.value);
-            input.classList.remove("error");
+            // console.log(input.value);
+            // input.classList.remove("error");
             if (input.value !== "") {
-                var d = this.validate(input.value);
-                if (!d) {
-                    input.classList.add("error");
-                    document.querySelector("#invalid-err").classList.remove("hide");
-                }
-                else newDates.push(d);
+                // var d = this.validate(input.value);
+                // if (!d) {
+                //     input.classList.add("error");
+                //     document.querySelector("#invalid-err").classList.remove("hide");
+                // }
+                newDates.add(input.value.slice(5));
             }
         });
+        newDates = Array.from(newDates);
+        console.log(newDates);
         if (newDates.length === 0) document.querySelector("#empty-err").classList.remove("hide");
-        else alert("Good job (some of) your inputs are valid. Event add coming soon...");
+        else {
+            const newEvent = {name: name, dates: newDates, id: -1};
+            this.setState(state => ({eventsList: state.eventsList.concat([newEvent])}));
+        }
+        // else alert("Good job (some of) your inputs are valid. Event add coming soon...");
         // ---------- make sure to validate for dup dates 
     }
 

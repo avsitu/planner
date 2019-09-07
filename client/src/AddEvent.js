@@ -23,6 +23,7 @@ class NewEvent extends Component<{ onFormSubmit(e): void }, {}> {
                         <p>Select Dates:</p>
                         <form className="form-inline dates-form" onSubmit={this.handleNewEvent} id="newForm">
                             <label htmlFor="date1" hidden />
+                            <input type="text" className="form-control mb-2 mr-sm-2" placeholder="Event name"/>
                             <input type="date" className="form-control mb-2 mr-sm-2" />
                             <input type="date" className="form-control mb-2 mr-sm-2" />
                             <input type="date" className="form-control mb-2 mr-sm-2" />
