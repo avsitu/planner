@@ -138,17 +138,18 @@ app.get("/events/get", (req, res) => {
 });
 
 app.get("/events/add", (req, res) => {
-  db3.run(`INSERT into event (name, dates) VALUES('event3', '1-1,1-2')`, [], function(err) {
+  const name = req.query.name, dates = req.query.dates;
+  db3.run(`INSERT into event (name, dates) VALUES(?, ?)`, [name, dates], function(err) {
     if (err) {
       throw err;
     }
     // console.log(this.lastID, this.changes);
-    db3.get(`select * from event where rowid=?`,[this.lastID],(err, row) => {
+    db3.get(`select rowid,* from event where rowid=?`,[this.lastID],(err, row) => {
       if (err) {
         throw err;
       }
-      console.log(row);
-      res.json(row);
+      // console.log(row);
+      res.json({name:row.name, id:row.rowid, dates: row.dates.split(',')});
     })  
   });
 });

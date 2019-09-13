@@ -26,7 +26,8 @@ const sampleDates = [
 
 const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM"];
 
-function findOverlap(eventData, dates) {
+function findOverlap(eventData, dates, count) {
+    if(count == 1) return [];
     var overlap = [];
     //populates list with all possible time slots
     dates.forEach(day => {
@@ -120,8 +121,7 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
                 .then(res => res.json())
                 .then(
                     (result) => {
-                        sampleInput[0] = result;
-                        console.log(result);
+                        // console.log(result);
                         this.setState({
                             eventId: index,
                             name: "Everyone",
@@ -159,7 +159,7 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
         this.setState((state) => ({ 
             users: state.users.concat([newName]),
             name: newName      
-        }));
+        }),()=>this.handleEventUpdate([]));
         // this.handleNameSwitch(newName);
         const url = `/users/add?name=${newName}&id=${this.state.eventsList[this.state.eventId].id}`;
         fetch(url);
@@ -184,7 +184,7 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
         // console.log(e.target.querySelectorAll("input"));
         const name = e.target.querySelector("input[type='text']").value;
         var inputs = e.target.querySelectorAll("input[type='date']");
-        var newDates = new Set();
+        const datesSet = new Set();
         inputs.forEach((input) => {
             // console.log(input.value);
             // input.classList.remove("error");
@@ -194,18 +194,26 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
                 //     input.classList.add("error");
                 //     document.querySelector("#invalid-err").classList.remove("hide");
                 // }
-                newDates.add(input.value.slice(5));
+                datesSet.add(input.value.slice(5));
             }
         });
-        newDates = Array.from(newDates);
-        console.log(newDates);
+        const newDates = Array.from(datesSet);
+        // console.log(newDates);
         if (newDates.length === 0) document.querySelector("#empty-err").classList.remove("hide");
         else {
-            const newEvent = {name: name, dates: newDates, id: -1};
-            this.setState(state => ({eventsList: state.eventsList.concat([newEvent])}));
+            const url = `/events/add?name=${name}&dates=${newDates.toString()}`;
+            fetch(url)
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        console.log(result);
+                        this.setState(state => ({eventsList: state.eventsList.concat([result])}));
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                );            
         }
-        // else alert("Good job (some of) your inputs are valid. Event add coming soon...");
-        // ---------- make sure to validate for dup dates 
     }
 
     render() {
@@ -216,7 +224,9 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
                     <Controls eventId={this.state.eventId} name={this.state.name} users={this.state.users}
                         onNameSwitch={this.handleNameSwitch} onPageSwitch={this.handlePageSwitch} onNewUser={this.handleNewUser} />
                     <EventTable dates={dates} name={this.state.name}
-                        data={this.state.name !== "Everyone" ? (this.state.data[this.state.name] || []) : findOverlap(this.state.data, dates)} />
+                        data={this.state.name !== "Everyone" ? 
+                            (this.state.data[this.state.name] || []) : 
+                            findOverlap(this.state.data, dates, this.state.users.length)} />
                     <SubmitButton name={this.state.name} eventId={this.state.eventId} onSubmit={this.handleEventUpdate} />
                 </div>
             );
@@ -230,8 +240,6 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
                     <NewEvent onFormSubmit={this.handleNewEvent} />
                     <ul>
                         {events}
-                        {/* <li><a href = "?event=0" onClick={this.handlePageSwitch}>Sample event 1</a></li>
-                        <li><a href = "?event=1" onClick={this.handlePageSwitch}>Sample event 2</a></li> */}
                     </ul>
                 </div>
             )
