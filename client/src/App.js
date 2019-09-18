@@ -56,7 +56,6 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
             path: "/"
         };
         this.handleNameSwitch = this.handleNameSwitch.bind(this);
-        this.handleBoxClick = this.handleBoxClick.bind(this);
         this.handlePageSwitch = this.handlePageSwitch.bind(this);
         this.handleNewEvent = this.handleNewEvent.bind(this);
         this.handleEventUpdate = this.handleEventUpdate.bind(this);
@@ -82,32 +81,9 @@ class App extends Component<{}, { eventId: number, data: {}, users: string[], na
     }
 
     handleNameSwitch(newName) {
-        // console.log(sampleInput);
-        // sampleInput[this.state.name] = this.state.data;
-        // console.log(sampleInput);
         this.setState({
             name: newName,
-            // data: newName === "Everyone" ? findOverlap(sampleInput[this.state.eventId], this.state.dates) : sampleInput[this.state.eventId][newName] 
         });
-    }
-
-    handleBoxClick(target) {
-        if (target.classList.contains("true")) {
-            // delete sampleInput[e.target.id];
-            target.classList.remove("true");
-            target.classList.add("false");
-            target.innerHTML = "false";
-            // var i = this.state.data.indexOf(target.id);
-            // this.setState((pstate) => { (this.state.data = pstate.data.splice(i, 1)) }, 
-            //     () => { console.log(this.state.data);});
-        }
-        else {
-            // sampleInput[e.target.id] = 1;
-            target.classList.remove("false");
-            target.classList.add("true");
-            target.innerHTML = "true";
-            // this.setState((pstate) => { (this.state.data = pstate.data.push(target.id)) }, () => { console.log(this.state.data);});
-        }
     }
 
     handlePageSwitch(e) {
